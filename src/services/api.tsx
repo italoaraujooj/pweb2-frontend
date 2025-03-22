@@ -71,4 +71,6 @@ export const UserService = {
   deleteUser: (id: string) => api.delete(`/users/${id}`),
 };
 
+
+
 export default api;
