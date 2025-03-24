@@ -71,6 +71,23 @@ export const UserService = {
   deleteUser: (id: string) => api.delete(`/users/${id}`),
 };
 
-
+export const PlaceService = {
+  createPlace: (data: {
+    name: string;
+    description: string;
+    pricePerTurn: number;
+    availability: { day: string; availableTurns: string[] }[];
+    address: {
+      cep: string;
+      pais: string;
+      estado: string;
+      cidade: string;
+      bairro: string;
+      rua: string;
+      numero: string;
+      complemento?: string;
+    };
+  }) => api.post("/places", data),
+};
 
 export default api;
