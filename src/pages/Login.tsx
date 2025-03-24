@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import { AuthService } from "../services/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,13 +13,14 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await api.post("/auth/login", { email, password });
+      const response = await AuthService.login({ email, password }); // 🔹 usa AuthService
+
       console.log("Login bem-sucedido:", response.data);
 
-      localStorage.setItem("userToken", response.data.token);
+      localStorage.setItem("token", response.data.token);
       localStorage.setItem("userEmail", email);
 
-      navigate("/dashboard");
+      navigate("/home");
     } catch (error: any) {
       console.error("Erro ao fazer login:", error);
       setError(error.response?.data?.message || "Erro ao tentar fazer login.");
@@ -27,7 +28,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+    <div className="min-h-screen min-w-screen flex flex-col items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         {error && (
           <p className="text-red-500 text-sm text-center mb-4">{error}</p>
@@ -58,15 +59,15 @@ export default function Login() {
             />
           </div>
 
-          <button className="w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600 transition">
+          <button className="w-full bg-black text-white p-2 rounded hover:bg-purple-600 transition">
             Entrar
           </button>
         </form>
         <div className="mt-4 text-center">
           <p className="text-gray-600">Ainda não tem uma conta?</p>
           <button
-            onClick={() => navigate("/register")}
-            className="w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600 transition mt-2"
+            onClick={() => navigate("/registro")}
+            className="w-full bg-black text-white p-2 rounded hover:bg-purple-600 transition mt-2"
           >
             Registrar-se
           </button>

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { RentService } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 export default function HomePage() {
-  const [places, setPlaces] = useState<any[]>([]);
+  const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [limit] = useState(6);
-  const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
 
@@ -21,8 +21,8 @@ export default function HomePage() {
     setError("");
     try {
       const response = await RentService.getAvailablePlaces(page, limit);
-      setPlaces(response.data.places || []);
-      setTotalPages(response.data.totalPages || 1);
+      setPlaces(response.data.places);
+      console.log(response.data)
     } catch (err: any) {
       console.error("Erro ao carregar espaços:", err);
       setError("Erro ao carregar os espaços disponíveis.");
@@ -36,7 +36,8 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen min-w-screen bg-gray-50 p-6">
+      {/* <Header /> */}
       <h1 className="text-3xl font-bold text-center mb-6">
         Espaços Disponíveis
       </h1>
@@ -51,7 +52,7 @@ export default function HomePage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {places.map((place) => (
+        {places.map((place: any) => (
           <div
             key={place.id}
             className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition"
@@ -64,12 +65,19 @@ export default function HomePage() {
               {place.address?.estado}
             </p>
             <p className="text-gray-800 font-medium mb-1">
-              R$ {place.pricePerTurn.toFixed(2)}/turno
+              R${" "}
+              {place.pricePerTurn?.toFixed(2)}
+              /turno
             </p>
             <p className="text-sm text-gray-500 mb-3">
-              Turnos disponíveis:{" "}
+              Turnos disponíveis:
               {place.availability
-                ?.map((a: any) => `${a.day} (${a.availableTurns.join(", ")})`)
+                ?.map(
+                  (item: any) =>
+                    `${new Date(
+                      item.day
+                    ).toLocaleDateString()} - ${item.availableTurns.join(", ")}`
+                )
                 .join(" | ") || "Não informado"}
             </p>
             <button
@@ -82,27 +90,22 @@ export default function HomePage() {
         ))}
       </div>
 
-      {!loading && !error && places.length > 0 && (
-        <div className="flex justify-center mt-8 gap-4">
-          <button
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            disabled={page === 1}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Anterior
-          </button>
-          <span className="text-gray-700 font-medium">Página {page}</span>
-          <button
-            onClick={() =>
-              setPage((prev) => (page < totalPages ? prev + 1 : prev))
-            }
-            disabled={page >= totalPages}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Próxima
-          </button>
-        </div>
-      )}
+      <div className="flex justify-center mt-8 gap-4">
+        <button
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          disabled={page === 1}
+          className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+        >
+          Anterior
+        </button>
+        <span className="text-gray-700 font-medium">Página {page}</span>
+        <button
+          onClick={() => setPage((prev) => prev + 1)}
+          className="px-4 py-2 bg-gray-300 rounded"
+        >
+          Próxima
+        </button>
+      </div>
     </div>
   );
 }
