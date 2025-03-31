@@ -32,6 +32,22 @@ export default function HomePage() {
     }
   };
 
+  const groupAvailability = (availability: any[]) => {
+    const groups: { [key: string]: string[] } = {};
+
+    availability.forEach((item) => {
+      const key = item.availableTurns.sort().join(", "); // Ex: "manhã,tarde"
+      const date = new Date(item.day).toLocaleDateString("pt-BR");
+
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(date);
+    });
+
+    return Object.entries(groups).map(
+      ([turnos, datas]) => `${datas.join(", ")} - ${turnos}`
+    );
+  };
+
   const handleRequestRent = (placeId: string) => {
     navigate(`/place/${placeId}`);
   };
@@ -39,9 +55,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen min-w-screen bg-gray-50 p-6">
       <Header />
-      <h1 className="text-3xl font-bold text-black text-center mb-6 py-6 px-4">
-        Espaços Disponíveis
-      </h1>
 
       {loading && <p className="text-center">Carregando espaços...</p>}
       {error && <p className="text-red-500 text-center">{error}</p>}
@@ -52,7 +65,7 @@ export default function HomePage() {
         </p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 py-6 px-4 lg:grid-cols-3 gap-6">
         {places.map((place: any) => (
           <div
             key={place.id}
@@ -69,24 +82,18 @@ export default function HomePage() {
               R$ {place.pricePerTurn?.toFixed(2)}
               /turno
             </p>
-            <p className="text-sm text-gray-500 mb-3">
+            {/* <p className="text-sm text-gray-500 mb-3">
               Disponibilidade:
               <br />
-              {place.availability
-                ?.map(
-                  (item: any) =>
-                    `${new Date(
-                      item.day
-                    ).toLocaleDateString()} - ${item.availableTurns.join(", ")}`
-                )
-                .join(" | ") || "Não informado"}
-            </p>
+              {groupAvailability(place.availability).join(" | ") ||
+                "Não informado"}
+            </p> */}
             {place.ownerId !== loggedUserId && (
               <button
-                className="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition"
-                onClick={() => handleRequestRent(place.id)}
+                onClick={() => navigate(`/place/${place.id}`)}
+                className="mt-2 w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition"
               >
-                Solicitar Aluguel
+                Ver Detalhes
               </button>
             )}
           </div>

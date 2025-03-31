@@ -65,8 +65,6 @@ export default function AvailabilitySelector({
     });
 
     const updated = [...availability, ...newItems];
-
-    // Ordena por data
     updated.sort((a, b) => a.day.getTime() - b.day.getTime());
 
     setAvailability([...updated]);
@@ -79,6 +77,22 @@ export default function AvailabilitySelector({
     const updated = availability.filter((_, i) => i !== index);
     setAvailability(updated);
     onChange(updated);
+  };
+
+  const groupAvailability = (items: AvailabilityItem[]) => {
+    const groups: { [key: string]: string[] } = {};
+
+    items.forEach((item) => {
+      const key = item.availableTurns.sort().join(", ");
+      const date = item.day.toLocaleDateString("pt-BR");
+
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(date);
+    });
+
+    return Object.entries(groups).map(
+      ([turnos, datas]) => `${datas.join(", ")} - ${turnos}`
+    );
   };
 
   useEffect(() => {
@@ -159,13 +173,11 @@ export default function AvailabilitySelector({
           Disponibilidade atual:
         </h4>
         <ul className="text-sm text-gray-800 grid grid-cols-1 space-y-2">
-          {availability.map((item, i) => (
+          {groupAvailability(availability).map((item, i) => (
             <li key={i} className="flex items-center group p-2 rounded">
-              <span>
-                {item.day.toLocaleDateString("pt-BR")} -{" "}
-                {item.availableTurns.join(", ")}
-              </span>
+              <span>{item}</span>
               <button
+                type="button"
                 onClick={() => removeItem(i)}
                 className="text-gray-500 cursor-pointer hover:text-red-600 ml-2 hidden group-hover:block transition outline-none focus:outline-none bg-transparent"
               >

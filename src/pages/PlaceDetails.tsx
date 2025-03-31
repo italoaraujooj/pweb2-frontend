@@ -2,12 +2,20 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { PlaceService } from "../services/api";
 import Header from "../components/Header";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ptBR } from "date-fns/locale/pt-BR";
+import { registerLocale } from "react-datepicker";
+
+registerLocale("pt-BR", ptBR);
 
 export default function PlaceDetails() {
   const { id } = useParams();
   const [place, setPlace] = useState<any>(null);
   const [error, setError] = useState("");
   const [isOwner, setIsOwner] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [availableTurns, setAvailableTurns] = useState<string[]>([]);
 
   useEffect(() => {
     fetchPlace();
@@ -24,6 +32,25 @@ export default function PlaceDetails() {
       }
     } catch (err: any) {
       setError("Erro ao carregar os dados do espaço.");
+    }
+  };
+
+  const availabilityMap = new Map<string, string[]>();
+
+  place?.availability?.forEach((item: any) => {
+    const key = new Date(item.day).toDateString();
+    availabilityMap.set(key, item.availableTurns);
+  });
+
+  const isDateAvailable = (date: Date) => {
+    return availabilityMap.has(date.toDateString());
+  };
+
+  const handleDateChange = (date: Date | null) => {
+    setSelectedDate(date);
+    if (date) {
+      const key = date.toDateString();
+      setAvailableTurns(availabilityMap.get(key) || []);
     }
   };
 
@@ -46,20 +73,40 @@ export default function PlaceDetails() {
           <strong>Descrição:</strong> {place.description || "Sem descrição."}
         </p>
 
-        <p className="mb-2">
+        <p className="mb-4">
           <strong>Preço por turno:</strong> R$ {place.pricePerTurn?.toFixed(2)}
         </p>
 
-        <div className="mb-4">
-          <strong>Disponibilidade:</strong>
-          <ul className="list-disc ml-5">
-            {place.availability?.map((item: any, index: number) => (
-              <li key={index}>
-                {new Date(item.day).toLocaleDateString()} -{" "}
-                {item.availableTurns.join(", ")}
-              </li>
-            ))}
-          </ul>
+        {/* Disponibilidade com calendário */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">Disponibilidade:</h3>
+          <DatePicker
+            inline
+            locale="pt-BR"
+            selected={selectedDate}
+            onChange={handleDateChange}
+            highlightDates={place.availability?.map(
+              (item: any) => new Date(item.day)
+            )}
+            filterDate={isDateAvailable}
+            placeholderText="Selecione uma data"
+            minDate={new Date()}
+          />
+          {selectedDate && (
+            <div className="mt-4">
+              <strong>
+                Turnos disponíveis em {selectedDate.toLocaleDateString("pt-BR")}
+                :
+              </strong>
+              <ul className="list-disc ml-6 mt-1">
+                {availableTurns.length > 0 ? (
+                  availableTurns.map((turn, i) => <li key={i}>{turn}</li>)
+                ) : (
+                  <li>Nenhum turno disponível</li>
+                )}
+              </ul>
+            </div>
+          )}
         </div>
 
         {place.equipments && place.equipments.length > 0 && (
