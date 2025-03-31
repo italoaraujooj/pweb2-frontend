@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { RentService } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { getUserIdFromToken } from "../utils/auth";
 
 export default function HomePage() {
   const [places, setPlaces] = useState([]);
@@ -9,7 +10,7 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [limit] = useState(6);
-
+  const loggedUserId = getUserIdFromToken();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function HomePage() {
     try {
       const response = await RentService.getAvailablePlaces(page, limit);
       setPlaces(response.data.places);
-      console.log(response.data)
+      console.log(response.data);
     } catch (err: any) {
       console.error("Erro ao carregar espaços:", err);
       setError("Erro ao carregar os espaços disponíveis.");
@@ -37,8 +38,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen min-w-screen bg-gray-50 p-6">
-      {/* <Header /> */}
-      <h1 className="text-3xl font-bold text-center mb-6">
+      <Header />
+      <h1 className="text-3xl font-bold text-black text-center mb-6 py-6 px-4">
         Espaços Disponíveis
       </h1>
 
@@ -61,16 +62,16 @@ export default function HomePage() {
               {place.name}
             </h2>
             <p className="text-gray-600 text-sm mb-1">
-              {place.address?.rua}, {place.address?.cidade} -{" "}
-              {place.address?.estado}
+              {place.address?.rua}, {place.address?.numero},{" "}
+              {place.address?.cidade} - {place.address?.estado}
             </p>
             <p className="text-gray-800 font-medium mb-1">
-              R${" "}
-              {place.pricePerTurn?.toFixed(2)}
+              R$ {place.pricePerTurn?.toFixed(2)}
               /turno
             </p>
             <p className="text-sm text-gray-500 mb-3">
-              Turnos disponíveis:
+              Disponibilidade:
+              <br />
               {place.availability
                 ?.map(
                   (item: any) =>
@@ -80,12 +81,14 @@ export default function HomePage() {
                 )
                 .join(" | ") || "Não informado"}
             </p>
-            <button
-              className="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition"
-              onClick={() => handleRequestRent(place.id)}
-            >
-              Solicitar Aluguel
-            </button>
+            {place.ownerId !== loggedUserId && (
+              <button
+                className="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition"
+                onClick={() => handleRequestRent(place.id)}
+              >
+                Solicitar Aluguel
+              </button>
+            )}
           </div>
         ))}
       </div>

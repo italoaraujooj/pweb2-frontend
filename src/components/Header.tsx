@@ -21,6 +21,7 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userEmail");
     setUser(null);
     navigate("/");
   };
@@ -33,19 +34,37 @@ export default function Header() {
           className="text-xl font-bold text-purple-600 cursor-pointer"
           onClick={() => navigate("/home")}
         >
-          AlugSpace
+          Alugaí
         </h1>
         <button
-          className="text-gray-700 hover:text-purple-600"
+          className="text-gray-700 hover:text-purple-600 cursor-pointer"
+          onClick={() => navigate("/home")}
+        >
+          Início
+        </button>
+        <button
+          className="text-gray-700 hover:text-purple-600 cursor-pointer"
           onClick={() => navigate("/places/create")}
         >
           Criar Espaço
         </button>
         <button
-          className="text-gray-700 hover:text-purple-600"
-          onClick={() => navigate("/minhas-locacoes")}
+          className="text-gray-700 hover:text-purple-600 cursor-pointer"
+          onClick={() => navigate("/rents")}
         >
           Minhas Locações
+        </button>
+        <button
+          className="text-gray-700 hover:text-purple-600 cursor-pointer"
+          onClick={() => navigate("/solicitacoes")}
+        >
+          Minhas Solicitações
+        </button>
+        <button
+          className="text-gray-700 hover:text-purple-600 cursor-pointer"
+          onClick={() => navigate("/meus-espacos")}
+        >
+          Meus espaços
         </button>
       </div>
 
@@ -53,7 +72,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            <span className="text-sm text-gray-700">Olá, {user.name}</span>
+            <span className="text-sm text-gray-700 font-bold hover:text-purple-600 cursor-pointer" onClick={() => navigate("/profile")}>Olá, {user.name}</span>
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
@@ -64,13 +83,13 @@ export default function Header() {
         ) : (
           <>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/login")}
               className="text-sm text-purple-600 hover:underline"
             >
               Entrar
             </button>
             <button
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/registro")}
               className="text-sm text-purple-600 hover:underline"
             >
               Registrar

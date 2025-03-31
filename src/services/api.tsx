@@ -88,6 +88,9 @@ export const PlaceService = {
       complemento?: string;
     };
   }) => api.post("/places", data),
+
+  getOwnPlaces: () => api.get("/places/own"),
+  getPlaceById: (id: string) => api.get(`/places/${id}`),
 };
 
 export default api;

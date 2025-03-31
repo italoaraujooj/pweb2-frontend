@@ -4,6 +4,11 @@ import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import HomePage from "./pages/HomePage";
 import CreatePlace from "./pages/CreatePlace";
+import MyPlaces from "./pages/MyPlaces";
+import PendingRequests from "./pages/PendingRequests";
+import MyRents from "./pages/MyRents";
+import PlaceDetails from "./pages/PlaceDetails";
+import UserProfile from "./pages/UserProfile";
 
 const AppRoutes = () => (
   <Router>
@@ -13,6 +18,11 @@ const AppRoutes = () => (
       <Route path="/registro" element={<Registro />} />
       <Route path="/home" element={<HomePage />} />
       <Route path="/places/create" element={<CreatePlace />} />
+      <Route path="/meus-espacos" element={<MyPlaces />} />
+      <Route path="/solicitacoes" element={<PendingRequests />} />
+      <Route path="/rents" element={<MyRents />} />
+      <Route path="/place/:id" element={<PlaceDetails />} />
+      <Route path="/profile" element={<UserProfile />} />
     </Routes>
   </Router>
 );

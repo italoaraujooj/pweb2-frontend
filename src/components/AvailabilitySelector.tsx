@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FiTrash } from "react-icons/fi";
+import { registerLocale } from "react-datepicker";
+import { ptBR } from "date-fns/locale/pt-BR";
+
+registerLocale("pt-BR", ptBR);
 
 const turnsList = ["manhã", "tarde", "noite", "madrugada"] as const;
 type Turn = (typeof turnsList)[number];
@@ -91,6 +95,7 @@ export default function AvailabilitySelector({
           </h3>
           <DatePicker
             inline
+            locale="pt-BR"
             highlightDates={selectedDates}
             onChange={toggleDate}
             minDate={new Date()}
