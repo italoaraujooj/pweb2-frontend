@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PlaceService } from "../services/api";
 import Header from "../components/Header";
 import DatePicker from "react-datepicker";
@@ -16,6 +16,7 @@ export default function PlaceDetails() {
   const [isOwner, setIsOwner] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [availableTurns, setAvailableTurns] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPlace();
@@ -60,8 +61,8 @@ export default function PlaceDetails() {
   return (
     <div className="min-h-screen min-w-screen text-black bg-gray-50 p-6">
       <Header />
-      <div className="max-w-5xl mx-auto py-6 px-4">
-        <h1 className="text-3xl font-bold mb-4">{place.name}</h1>
+      <div className="max-w-5xl mx-auto  py-6 px-4">
+        <h1 className="text-3xl text-center font-bold mb-4">{place.name}</h1>
 
         <p className="mb-2">
           <strong>Endereço:</strong> {place.address?.rua},{" "}
@@ -123,7 +124,10 @@ export default function PlaceDetails() {
         )}
 
         {!isOwner && (
-          <button className="mt-4 bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700">
+          <button
+            className="mt-4 bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700"
+            onClick={() => navigate(`/request/${id}`)}
+          >
             Solicitar Aluguel
           </button>
         )}

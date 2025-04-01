@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { RentService } from "../services/api";
 import Header from "../components/Header";
+import { getUserIdFromToken } from "../utils/auth";
 
 export default function PendingRequests() {
   const [pendingRents, setPendingRents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const userId = getUserIdFromToken();
 
   const fetchPendingRents = async () => {
     setLoading(true);
     try {
       const response = await RentService.getUserRents();
       const filtered = response.data.filter(
-        (rent: any) =>
-          rent.status === "pending" &&
-          rent.ownerId === localStorage.getItem("userId")
+        (rent: any) => rent.status === "pendente" && rent.ownerId === userId && Array.isArray(rent.schedules)
       );
       setPendingRents(filtered);
     } catch (err: any) {
@@ -28,7 +28,10 @@ export default function PendingRequests() {
     fetchPendingRents();
   }, []);
 
-  const handleAction = async (id: string, status: "approved" | "rejected") => {
+  const handleAction = async (
+    id: string,
+    status: "confirmado" | "rejeitado"
+  ) => {
     try {
       await RentService.approveRent(id, status);
       fetchPendingRents();
@@ -56,7 +59,7 @@ export default function PendingRequests() {
 
         <ul className="space-y-4">
           {pendingRents.map((rent: any) => (
-            <li key={rent.id} className="bg-white shadow rounded p-4">
+            <li key={rent.id} className="bg-white shadow text-black rounded p-4">
               <p>
                 <strong>Espaço:</strong> {rent.place?.name}
               </p>
@@ -67,7 +70,7 @@ export default function PendingRequests() {
                 <strong>Horários:</strong>
               </p>
               <ul className="ml-4 list-disc">
-                {rent.schedules.map((s: any, i: number) => (
+                {rent.schedules?.map((s: any, i: number) => (
                   <li key={i}>
                     {new Date(s.startDate).toLocaleString()} -{" "}
                     {new Date(s.endDate).toLocaleString()}
@@ -76,13 +79,13 @@ export default function PendingRequests() {
               </ul>
               <div className="mt-4 flex gap-4">
                 <button
-                  onClick={() => handleAction(rent.id, "approved")}
+                  onClick={() => handleAction(rent.id, "confirmado")}
                   className="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600"
                 >
                   Aprovar
                 </button>
                 <button
-                  onClick={() => handleAction(rent.id, "rejected")}
+                  onClick={() => handleAction(rent.id, "rejeitado")}
                   className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
                 >
                   Rejeitar

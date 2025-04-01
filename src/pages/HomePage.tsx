@@ -23,33 +23,12 @@ export default function HomePage() {
     try {
       const response = await RentService.getAvailablePlaces(page, limit);
       setPlaces(response.data.places);
-      console.log(response.data);
     } catch (err: any) {
       console.error("Erro ao carregar espaços:", err);
       setError("Erro ao carregar os espaços disponíveis.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const groupAvailability = (availability: any[]) => {
-    const groups: { [key: string]: string[] } = {};
-
-    availability.forEach((item) => {
-      const key = item.availableTurns.sort().join(", "); // Ex: "manhã,tarde"
-      const date = new Date(item.day).toLocaleDateString("pt-BR");
-
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(date);
-    });
-
-    return Object.entries(groups).map(
-      ([turnos, datas]) => `${datas.join(", ")} - ${turnos}`
-    );
-  };
-
-  const handleRequestRent = (placeId: string) => {
-    navigate(`/place/${placeId}`);
   };
 
   return (

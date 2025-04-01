@@ -53,10 +53,17 @@ export const RentService = {
   getAvailablePlaces: (page: number, limit: number) =>
     api.get(`/places/available?page=${page}&limit=${limit}`),
 
-  requestRent: (data: { placeId: string; schedules: any[] }) =>
-    api.post("/rents/request", data),
+  requestRent: (data: {
+    placeId: string;
+    ownerId: string;
+    renterId: string;
+    totalValue: number;
+    status: string;
+    paymentMethod: string;
+    schedules: { day: string; turns: string[] }[];
+  }) => api.post("/rents/request", data),
 
-  approveRent: (id: string, status: "approved" | "rejected") =>
+  approveRent: (id: string, status: "confirmado" | "rejeitado") =>
     api.put(`/rents/${id}/approve`, { status }),
 
   cancelRent: (id: string) => api.put(`/rents/${id}/cancel`),

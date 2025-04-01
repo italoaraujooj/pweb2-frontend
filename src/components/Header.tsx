@@ -7,6 +7,9 @@ export default function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
     const fetchUser = async () => {
       try {
         const response = await AuthService.getUser();
@@ -23,7 +26,7 @@ export default function Header() {
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
     setUser(null);
-    navigate("/");
+    navigate("/home");
   };
 
   return (
@@ -72,7 +75,12 @@ export default function Header() {
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            <span className="text-sm text-gray-700 font-bold hover:text-purple-600 cursor-pointer" onClick={() => navigate("/profile")}>Olá, {user.name}</span>
+            <span
+              className="text-sm text-gray-700 font-bold hover:text-purple-600 cursor-pointer"
+              onClick={() => navigate("/profile")}
+            >
+              Olá, {user.name}
+            </span>
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"

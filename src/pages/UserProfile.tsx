@@ -28,7 +28,8 @@ const UserProfile = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
-    navigate("/");
+    setUser(null);
+    navigate("/home");
   };
 
   if (loading) return <p className="text-center">Carregando perfil...</p>;

@@ -17,7 +17,6 @@ export default function MyPlaces() {
     try {
       const response = await PlaceService.getOwnPlaces(); // 👈 chamada ao backend
       setPlaces(response.data);
-      console.log(response);
     } catch (err: any) {
       console.error("Erro ao buscar seus espaços:", err);
       setError("Erro ao buscar seus espaços.");
