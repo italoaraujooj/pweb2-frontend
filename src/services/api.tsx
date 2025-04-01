@@ -76,6 +76,15 @@ export const UserService = {
   getUserById: (id: string) => api.get(`/users/${id}`),
   updateUser: (id: string, data: any) => api.put(`/users/${id}`, data),
   deleteUser: (id: string) => api.delete(`/users/${id}`),
+  updateProfileImage: (userId: string, file: File) => {
+    const formData = new FormData();
+    formData.append("profileImage", file);
+    formData.append("userId", userId);
+  
+    return api.patch(`/users/upload-profile-image`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  }
 };
 
 export const PlaceService = {
@@ -97,7 +106,12 @@ export const PlaceService = {
   }) => api.post("/places", data),
 
   getOwnPlaces: () => api.get("/places/own"),
+
   getPlaceById: (id: string) => api.get(`/places/${id}`),
+
+  updatePlace: (id: string, data: any) => api.put(`/places/${id}`, data),
+
+  deletePlace: (id: string) => api.delete(`/places/${id}`),
 };
 
 export default api;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PlaceService } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { FiEdit, FiTrash } from "react-icons/fi";
 
 export default function MyPlaces() {
   const [places, setPlaces] = useState([]);
@@ -15,13 +16,27 @@ export default function MyPlaces() {
 
   const fetchMyPlaces = async () => {
     try {
-      const response = await PlaceService.getOwnPlaces(); // 👈 chamada ao backend
+      const response = await PlaceService.getOwnPlaces();
       setPlaces(response.data);
     } catch (err: any) {
       console.error("Erro ao buscar seus espaços:", err);
       setError("Erro ao buscar seus espaços.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const confirm = window.confirm(
+      "Tem certeza que deseja remover este espaço?"
+    );
+    if (!confirm) return;
+
+    try {
+      await PlaceService.deletePlace(id);
+      setPlaces((prev) => prev.filter((p: any) => p.id !== id));
+    } catch (err: any) {
+      alert("Erro ao remover o espaço.");
     }
   };
 
@@ -45,8 +60,22 @@ export default function MyPlaces() {
         {places.map((place: any) => (
           <div
             key={place.id}
-            className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition"
+            className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition relative"
           >
+            {/* Ícones */}
+            <div className="absolute top-2 right-2 flex gap-2">
+              <FiEdit
+                className="text-blue-500 cursor-pointer hover:text-blue-700"
+                onClick={() => navigate(`/place/edit/${place.id}`)}
+                title="Editar"
+              />
+              <FiTrash
+                className="text-red-500 cursor-pointer hover:text-red-700"
+                onClick={() => handleDelete(place.id)}
+                title="Remover"
+              />
+            </div>
+
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               {place.name}
             </h2>

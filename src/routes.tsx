@@ -10,6 +10,8 @@ import MyRents from "./pages/MyRents";
 import PlaceDetails from "./pages/PlaceDetails";
 import UserProfile from "./pages/UserProfile";
 import RequestRentPage from "./pages/RequestRentPage";
+import EditPlacePage from "./pages/EditPlace";
+import EditUserProfile from "./pages/EditProfile";
 
 const AppRoutes = () => (
   <Router>
@@ -25,6 +27,8 @@ const AppRoutes = () => (
       <Route path="/place/:id" element={<PlaceDetails />} />
       <Route path="/profile" element={<UserProfile />} />
       <Route path="/request/:id" element={<RequestRentPage />} />
+      <Route path="/place/edit/:id" element={<EditPlacePage />} />
+      <Route path="/user/edit/:id" element={<EditUserProfile />} />
     </Routes>
   </Router>
 );
