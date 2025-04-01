@@ -9,6 +9,7 @@ import PendingRequests from "./pages/PendingRequests";
 import MyRents from "./pages/MyRents";
 import PlaceDetails from "./pages/PlaceDetails";
 import UserProfile from "./pages/UserProfile";
+import RequestRentPage from "./pages/RequestRentPage";
 
 const AppRoutes = () => (
   <Router>
@@ -23,6 +24,7 @@ const AppRoutes = () => (
       <Route path="/rents" element={<MyRents />} />
       <Route path="/place/:id" element={<PlaceDetails />} />
       <Route path="/profile" element={<UserProfile />} />
+      <Route path="/request/:id" element={<RequestRentPage />} />
     </Routes>
   </Router>
 );
