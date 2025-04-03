@@ -6,8 +6,10 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { getUserIdFromToken } from "../utils/auth";
 import { ptBR } from "date-fns/locale/pt-BR";
+import { enCA } from "date-fns/locale/en-CA";
 
 registerLocale("pt-BR", ptBR);
+registerLocale("en-CA", enCA);
 
 const turnsList = ["manhã", "tarde", "noite", "madrugada"] as const;
 type Turn = (typeof turnsList)[number];
@@ -83,7 +85,7 @@ export default function RequestRentPage() {
       return;
 
     const newSchedules: Schedule[] = selectedDates.map((date) => {
-      const day = date.toISOString().split("T")[0];
+      const day = date.toLocaleDateString("en-CA");
       const availableDay = place.availability.find(
         (a: any) => new Date(a.day).toDateString() === date.toDateString()
       );
@@ -137,7 +139,7 @@ export default function RequestRentPage() {
         schedules,
       });
       setSuccess("Solicitação enviada com sucesso!");
-      setTimeout(() => navigate("/minhas-locacoes"), 2000);
+      setTimeout(() => navigate("/rents"), 2000);
     } catch (err: any) {
       setError(err.response?.data?.message || "Erro ao solicitar aluguel.");
     }
@@ -148,6 +150,12 @@ export default function RequestRentPage() {
     return place.availability.some(
       (a: any) => new Date(a.day).toDateString() === date.toDateString()
     );
+  };
+
+  const formatLocalDate = (isoDate: string) => {
+    const [year, month, day] = isoDate.split("-").map(Number);
+    const localDate = new Date(year, month - 1, day); // Note que o mês começa em 0
+    return localDate.toLocaleDateString("pt-BR"); // ou "en-CA" se preferir manter o padrão
   };
 
   return (
@@ -218,8 +226,7 @@ export default function RequestRentPage() {
               {schedules.map((s) => (
                 <li key={s.day} className="flex justify-between items-center">
                   <span>
-                    {new Date(s.day).toLocaleDateString("pt-BR")} -{" "}
-                    {s.turns.join(", ")}
+                    {formatLocalDate(s.day)} - {s.turns.join(", ")}
                   </span>
                   <button
                     onClick={() => removeSchedule(s.day)}

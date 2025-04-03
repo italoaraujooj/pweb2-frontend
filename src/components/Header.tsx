@@ -28,7 +28,7 @@ export default function Header() {
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
     setUser(null);
-    navigate("/home");
+    navigate("/");
   };
 
   if (loading) return <p className="text-center">Carregando perfil...</p>;

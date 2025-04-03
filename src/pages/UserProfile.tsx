@@ -30,7 +30,7 @@ const UserProfile = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
     setUser(null);
-    navigate("/home");
+    navigate("/");
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
