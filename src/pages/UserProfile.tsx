@@ -90,6 +90,9 @@ const UserProfile = () => {
 
         <div className="space-y-2 text-gray-700 text-center">
           <p>
+            <strong>Avaliação:</strong> {user.averageRating}
+          </p>
+          <p>
             <strong>Nome:</strong> {user.name}
           </p>
           <p>

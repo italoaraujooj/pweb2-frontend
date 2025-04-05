@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { RentService } from "../services/api";
 import Header from "../components/Header";
+import { getUserIdFromToken } from "../utils/auth";
 
 export default function MyRents() {
   const [rents, setRents] = useState<any[]>([]);
   const [filter, setFilter] = useState<"received" | "made">("received");
   const [loading, setLoading] = useState(true);
+  const userId = getUserIdFromToken();
 
   useEffect(() => {
     fetchRents();
@@ -15,11 +17,11 @@ export default function MyRents() {
     try {
       setLoading(true);
       const response = await RentService.getUserRents();
-      const userId = localStorage.getItem("userId");
 
       const filtered = response.data.filter((rent: any) =>
         filter === "received" ? rent.ownerId === userId : rent.renterId === userId
       );
+      console.log(userId);
 
       setRents(filtered);
     } catch (err) {
@@ -81,11 +83,11 @@ export default function MyRents() {
                 </p>
                 <p className="text-sm text-gray-500">
                   Horários:
-                  {rent.schedules.map((s: any, index: number) => (
+                  {/* {rent.schedules.map((s: any, index: number) => (
                     <div key={index}>
                       {new Date(s.startDate).toLocaleString()} - {new Date(s.endDate).toLocaleString()}
                     </div>
-                  ))}
+                  ))} */}
                 </p>
               </div>
             ))}
