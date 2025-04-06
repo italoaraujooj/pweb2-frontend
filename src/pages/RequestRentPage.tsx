@@ -262,7 +262,7 @@ export default function RequestRentPage() {
         <button
           onClick={handleSubmit}
           disabled={schedules.length === 0}
-          className="mt-6 w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
+          className="mt-6 w-full bg-purple-600 text-white cursor-pointer py-2 rounded hover:bg-purple-700"
         >
           Enviar Solicitação
         </button>

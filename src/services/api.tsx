@@ -114,4 +114,24 @@ export const PlaceService = {
   deletePlace: (id: string) => api.delete(`/places/${id}`),
 };
 
+export const RatingService = {
+  rateUser: async (data: {
+    reviewerId: string;
+    reviewedId: string;
+    rentId: string;
+    rating: number;
+    description?: string;
+  }) => {
+    return await api.post("/ratings/", data);
+  },
+
+  updateUserAverageRating: async (userId: string) => {
+    return await api.put(`/ratings/user`);
+  },
+
+  updatePlaceAverageRating: async (placeId: string) => {
+    return await api.put(`/ratings/place`);
+  },
+};
+
 export default api;

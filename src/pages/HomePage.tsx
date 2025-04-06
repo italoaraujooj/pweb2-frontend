@@ -22,6 +22,7 @@ export default function HomePage() {
     setError("");
     try {
       const response = await RentService.getAvailablePlaces(page, limit);
+      console.log(response);
       setPlaces(response.data.places);
     } catch (err: any) {
       console.error("Erro ao carregar espaços:", err);
