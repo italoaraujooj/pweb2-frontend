@@ -14,7 +14,7 @@ export default function PendingRequests() {
     try {
       const response = await RentService.getUserRents();
       const filtered = response.data.filter(
-        (rent: any) => rent.status === "pendente" && rent.ownerId === userId && Array.isArray(rent.schedules)
+        (rent: any) => rent.status === "pendente" && rent.owner.id === userId
       );
       setPendingRents(filtered);
     } catch (err: any) {
@@ -59,24 +59,49 @@ export default function PendingRequests() {
 
         <ul className="space-y-4">
           {pendingRents.map((rent: any) => (
-            <li key={rent.id} className="bg-white shadow text-black rounded p-4">
-              <p>
-                <strong>Espaço:</strong> {rent.place?.name}
+            <li
+              key={rent.id}
+              className="bg-white shadow text-black rounded p-4"
+            >
+              <div className="flex items-center gap-4">
+                <img
+                  src={rent.renter?.profileImage || "/default-avatar.png"}
+                  alt="Foto do solicitante"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-purple-500"
+                />
+                <div>
+                  <p>
+                    <strong>Solicitante:</strong> {rent.renter?.name}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {rent.renter?.email}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-2">
+                <strong>Espaço:</strong> {rent.place?.name} –{" "}
+                <strong>Valor total:</strong> R$ {rent.totalValue?.toFixed(2)}
               </p>
+
               <p>
-                <strong>Solicitante:</strong> {rent.renter?.name}
+                <strong>Forma de pagamento:</strong>{" "}
+                {rent.paymentMethod.toUpperCase()}
               </p>
+
               <p>
-                <strong>Horários:</strong>
+                <strong>Data da solicitação:</strong>{" "}
+                {new Date(rent.createdAt).toLocaleString("pt-BR")}
               </p>
-              <ul className="ml-4 list-disc">
-                {rent.schedules?.map((s: any, i: number) => (
-                  <li key={i}>
-                    {new Date(s.startDate).toLocaleString()} -{" "}
-                    {new Date(s.endDate).toLocaleString()}
-                  </li>
-                ))}
-              </ul>
+
+              {/* Se futuramente quiser mostrar agendamento:
+      <ul className="ml-4 list-disc">
+        {rent.schedules?.map((s: any, i: number) => (
+          <li key={i}>{s.day} - {s.turns.join(", ")}</li>
+        ))}
+      </ul> 
+      */}
+
               <div className="mt-4 flex gap-4">
                 <button
                   onClick={() => handleAction(rent.id, "confirmado")}
