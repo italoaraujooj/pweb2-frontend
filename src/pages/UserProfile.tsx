@@ -59,10 +59,10 @@ const UserProfile = () => {
         <div className="flex justify-center mb-6">
           <div className="relative group w-32 h-32">
             <img
-              src={user.profileImage}
+              src={user.profileImage || "../assets/default-avatar.png"}
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = "/default-avatar.png";
+                e.currentTarget.src = "/assets/default-avatar.png";
               }}
               alt="Foto de Perfil"
               className="w-32 h-32 rounded-full object-cover border-4 border-purple-500"

@@ -13,17 +13,30 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await AuthService.login({ email, password }); // 🔹 usa AuthService
+      const response = await AuthService.login({ email, password });
 
       console.log("Login bem-sucedido:", response.data);
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("userEmail", email);
+      localStorage.setItem("userId", response.data.user.id); // 👈 se você quiser usar depois
 
       navigate("/home");
     } catch (error: any) {
-      console.error("Erro ao fazer login:", error);
-      setError(error.response?.data?.message || "Erro ao tentar fazer login.");
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message;
+
+        if (status === 401) {
+          setError("E-mail ou senha inválidos. Verifique seus dados.");
+        } else if (status === 404) {
+          setError("Usuário não encontrado.");
+        } else {
+          setError(message || "Erro ao tentar fazer login.");
+        }
+      } else {
+        setError("Erro de conexão. Verifique sua internet ou tente novamente.");
+      }
     }
   };
 
@@ -31,7 +44,9 @@ export default function Login() {
     <div className="min-h-screen min-w-screen flex flex-col items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         {error && (
-          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+          <div className="flex items-center justify-center text-red-500 text-sm mb-4">
+            ⚠️ <span className="ml-2">{error}</span>
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -85,12 +85,12 @@ export default function Header() {
               className="flex flex-col items-center cursor-pointer"
             >
               <img
-                src={user.profileImage}
+                src={user.profileImage || "../assets/default-avatar.png"}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
-                  e.currentTarget.src = "/default-avatar.png";
+                  e.currentTarget.src = "../assets/default-avatar.png";
                 }}
-                alt="Avatar"
+                alt="Teste"
                 className="w-10 h-10 rounded-full object-cover border-2 border-purple-500"
               />
               <span className="text-xs text-gray-700 font-bold hover:text-purple-600 mt-1">
