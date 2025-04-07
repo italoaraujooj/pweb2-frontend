@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { RatingService, RentService } from "../services/api";
 import Header from "../components/Header";
 import { getUserIdFromToken } from "../utils/auth";
+import { getUserIdFromToken } from "../utils/auth";
 
 export default function MyRents() {
   const [rents, setRents] = useState<any[]>([]);
@@ -10,6 +11,8 @@ export default function MyRents() {
   const [ratedOwners, setRatedOwners] = useState<{ [key: string]: number }>({});
   const [ratedPlaces, setRatedPlaces] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
+
+  const userId = getUserIdFromToken();
 
   const userId = getUserIdFromToken();
 
@@ -81,11 +84,15 @@ export default function MyRents() {
         filter === "received"
           ? rent.owner?.id === userId && rent.status === "confirmado"
           : rent.renter?.id === userId && rent.status === "confirmado"
+        filter === "received"
+          ? rent.owner?.id === userId && rent.status === "confirmado"
+          : rent.renter?.id === userId && rent.status === "confirmado"
       );
       console.log(userId);
 
       setRents(filtered);
     } catch (err) {
+      console.error("Erro ao carregar locações:", err);
       console.error("Erro ao carregar locações:", err);
     } finally {
       setLoading(false);
@@ -108,6 +115,9 @@ export default function MyRents() {
               filter === "received"
                 ? "bg-purple-500 text-white"
                 : "bg-white text-gray-700 border"
+              filter === "received"
+                ? "bg-purple-500 text-white"
+                : "bg-white text-gray-700 border"
             }`}
           >
             Meus Espaços
@@ -118,6 +128,9 @@ export default function MyRents() {
               filter === "made"
                 ? "bg-purple-500 text-white"
                 : "bg-white text-gray-700 border"
+              filter === "made"
+                ? "bg-purple-500 text-white"
+                : "bg-white text-gray-700 border"
             }`}
           >
             Espaços Alugados
@@ -125,6 +138,7 @@ export default function MyRents() {
         </div>
 
         {loading ? (
+          <p className="text-center">Carregando locações...</p>
           <p className="text-center">Carregando locações...</p>
         ) : rents.length === 0 ? (
           <p className="text-center text-gray-500">
@@ -268,3 +282,4 @@ export default function MyRents() {
     </div>
   );
 }
+
