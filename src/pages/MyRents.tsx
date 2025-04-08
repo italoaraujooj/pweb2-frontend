@@ -2,17 +2,50 @@ import { useEffect, useState } from "react";
 import { RatingService, RentService } from "../services/api";
 import Header from "../components/Header";
 import { getUserIdFromToken } from "../utils/auth";
-import { getUserIdFromToken } from "../utils/auth";
+import { FiCheck, FiStar } from "react-icons/fi";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 export default function MyRents() {
   const [rents, setRents] = useState<any[]>([]);
   const [filter, setFilter] = useState<"received" | "made">("received");
-  const [selectedRent, setSelectedRent] = useState<any | null>(null); // qual locação está sendo avaliada
+  const [selectedRent, setSelectedRent] = useState<any | null>(null);
   const [ratedOwners, setRatedOwners] = useState<{ [key: string]: number }>({});
-  const [ratedPlaces, setRatedPlaces] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
+  const [ratingStep, setRatingStep] = useState<"owner" | "place">("owner");
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+  const [ratingDescription, setRatingDescription] = useState("");
+  const [userRatings, setUserRatings] = useState<any[]>([]);
+  const loggedUserId = getUserIdFromToken();
 
-  const userId = getUserIdFromToken();
+  useEffect(() => {
+    fetchRents();
+    fetchRatings();
+  }, [filter]);
+
+  const fetchRatings = async () => {
+    try {
+      if (loggedUserId) {
+        const response = await RatingService.getRatingsByUser(loggedUserId);
+        setUserRatings(response.data);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar avaliações:", err);
+    }
+  };
+
+  const hasRatedRent = (rentId: string, reviewerId: string) => {
+    return userRatings.some(
+      (r) => r.rentId === rentId && r.reviewerId === reviewerId
+    );
+  };
+
+  const ratingLabels: Record<1 | 2 | 3 | 4 | 5, string> = {
+    1: "Ruim",
+    2: "Regular",
+    3: "Bom",
+    4: "Muito bom",
+    5: "Excelente",
+  };
 
   const userId = getUserIdFromToken();
 
@@ -20,84 +53,56 @@ export default function MyRents() {
     fetchRents();
   }, [filter]);
 
-  const handleSubmitRatings = async () => {
-    if (!userId || !selectedRent) return;
-    console.log("Enviando avaliação para usuário...");
-  
-    try {
-      if (ratedOwners[selectedRent.owner?.id] !== undefined) {
-        console.log("Payload da avaliação de usuário:", {
-          reviewerId: userId,
-          reviewedId: selectedRent.owner?.id,
-          rentId: selectedRent.id,
-          rating: ratedOwners[selectedRent.owner?.id],
-        });
-        await RatingService.rateUser({
-          reviewerId: userId,
-          reviewedId: selectedRent.owner?.id,
-          rentId: selectedRent.id,
-          rating: ratedOwners[selectedRent.owner?.id],
-        });
-  
-        // Atualiza a média do usuário avaliado
-        console.log("Atualizando média do usuário...");
-        await RatingService.updateUserAverageRating(selectedRent.owner?.id);
-      }
-  
-      if (ratedPlaces[selectedRent.place?.id] !== undefined) {
-        console.log("Enviando avaliação para local...");
-        await RatingService.rateUser({
-          reviewerId: userId,
-          reviewedId: selectedRent.place?.id,
-          rentId: selectedRent.id,
-          rating: ratedPlaces[selectedRent.place?.id],
-        });
-  
-        // Atualiza a média do local avaliado
-        console.log("Atualizando média do local...");
-        await RatingService.updatePlaceAverageRating(selectedRent.place?.id);
-      }
-    } catch (err) {
-      console.log(err);
-      console.error("Erro ao enviar avaliação:", err);
-    } finally {
-      setSelectedRent(null); // Sempre fecha o modal, com ou sem erro
-    }
-  };
-
-  const handleRateOwner = (ownerId: string, rating: number) => {
-    setRatedOwners((prev) => ({ ...prev, [ownerId]: rating }));
-    console.log(`Avaliação do dono (${ownerId}): ${rating}`);
-  };
-  
-  const handleRatePlace = (placeId: string, rating: number) => {
-    setRatedPlaces((prev) => ({ ...prev, [placeId]: rating }));
-    console.log(`Avaliação do espaço (${placeId}): ${rating}`);
-  };
-
   const fetchRents = async () => {
     try {
       setLoading(true);
       const response = await RentService.getUserRents();
-
       const filtered = response.data.filter((rent: any) =>
         filter === "received"
-          ? rent.owner?.id === userId && rent.status === "confirmado"
-          : rent.renter?.id === userId && rent.status === "confirmado"
-        filter === "received"
-          ? rent.owner?.id === userId && rent.status === "confirmado"
-          : rent.renter?.id === userId && rent.status === "confirmado"
+          ? rent.owner?.id === userId && rent.status !== "pendente"
+          : rent.renter?.id === userId && rent.status !== "pendente"
       );
-      console.log(userId);
-
       setRents(filtered);
     } catch (err) {
-      console.error("Erro ao carregar locações:", err);
       console.error("Erro ao carregar locações:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleRateOwner = (ownerId: string, rating: number) => {
+    setRatedOwners((prev) => ({ ...prev, [ownerId]: rating }));
+  };
+
+  const handleSubmitRatings = async () => {
+    if (!userId || !selectedRent) return;
+
+    const reviewedUserId =
+      filter === "received" ? selectedRent.renter?.id : selectedRent.owner?.id;
+
+    try {
+      await RatingService.rateUser({
+        reviewerId: userId,
+        reviewedId: reviewedUserId,
+        rentId: selectedRent.id,
+        rating: ratedOwners[reviewedUserId],
+        description: ratingDescription,
+      });
+
+      await RatingService.updateUserAverageRating(reviewedUserId);
+    } catch (err) {
+      console.error("Erro ao enviar avaliação:", err);
+    } finally {
+      setSelectedRent(null);
+      setRatingStep("owner");
+      setRatingDescription("");
+    }
+  };
+
+  const currentRating = selectedRent
+    ? hoveredStar ||
+      (ratingStep === "owner" ? ratedOwners[selectedRent.owner?.id] : null)
+    : null;
 
   return (
     <div className="min-h-screen min-w-screen bg-gray-50 p-6">
@@ -115,9 +120,6 @@ export default function MyRents() {
               filter === "received"
                 ? "bg-purple-500 text-white"
                 : "bg-white text-gray-700 border"
-              filter === "received"
-                ? "bg-purple-500 text-white"
-                : "bg-white text-gray-700 border"
             }`}
           >
             Meus Espaços
@@ -125,9 +127,6 @@ export default function MyRents() {
           <button
             onClick={() => setFilter("made")}
             className={`px-4 py-2 rounded font-medium ${
-              filter === "made"
-                ? "bg-purple-500 text-white"
-                : "bg-white text-gray-700 border"
               filter === "made"
                 ? "bg-purple-500 text-white"
                 : "bg-white text-gray-700 border"
@@ -139,7 +138,6 @@ export default function MyRents() {
 
         {loading ? (
           <p className="text-center">Carregando locações...</p>
-          <p className="text-center">Carregando locações...</p>
         ) : rents.length === 0 ? (
           <p className="text-center text-gray-500">
             Nenhuma locação encontrada.
@@ -148,6 +146,7 @@ export default function MyRents() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {rents.map((rent) => {
               const other = filter === "received" ? rent.renter : rent.owner;
+              const alreadyRated = hasRatedRent(rent.id, loggedUserId || "");
 
               return (
                 <div
@@ -175,23 +174,29 @@ export default function MyRents() {
                   <h2 className="text-lg font-semibold text-gray-800">
                     {rent.place?.name || "Espaço"}
                   </h2>
-
-                  <p className="text-sm text-gray-600 mb-1">
-                    Status: <span className="font-medium">{rent.status}</span>
+                  <p className="text-sm text-gray-600 mb-1 flex items-center gap-2">
+                    Status:
+                    {rent.status === "finalizado" ? (
+                      <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded-full">
+                        Finalizado
+                      </span>
+                    ) : (
+                      <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-1 rounded-full">
+                        {rent.status.charAt(0).toUpperCase() +
+                          rent.status.slice(1)}
+                      </span>
+                    )}
                   </p>
-
                   <p className="text-sm text-gray-600 mb-1">
                     Total:{" "}
                     <span className="font-medium">
                       R$ {rent.totalValue?.toFixed(2)}
                     </span>
                   </p>
-
                   <p className="text-sm text-gray-600 mb-1">
                     Forma de pagamento:{" "}
                     <span className="uppercase">{rent.paymentMethod}</span>
                   </p>
-
                   <p className="text-sm text-gray-600 mb-1">
                     Solicitado em:{" "}
                     {new Date(rent.createdAt).toLocaleDateString("pt-BR")}
@@ -199,79 +204,133 @@ export default function MyRents() {
 
                   <div className="text-sm text-gray-500 mt-2">
                     <p className="font-medium">Horários:</p>
-                    {rent.schedules.map((s: any, i: number) => (
+                    {rent.schedules?.map((s: any, i: number) => (
                       <div key={i}>
-                        {s.day} – {s.turns.join(", ")}
+                        {new Date(`${s.day}T12:00:00`).toLocaleDateString(
+                          "pt-BR"
+                        )}{" "}
+                        – {s.turns.join(", ")}
                       </div>
                     ))}
                   </div>
-                  <button 
-                  className="px-3 py-1 rounded text-white bg-purple-500"
-                  onClick={() => setSelectedRent(rent)}
-                  >Avaliar</button>
+                  <div className="flex justify-end gap-4 mt-4">
+                    {rent.status !== "finalizado" && (
+                      <button
+                        className="flex items-center gap-2 px-3 py-1 rounded text-white bg-purple-500 hover:bg-purple-600 transition"
+                        onClick={async () => {
+                          const confirm = window.confirm(
+                            "Tem certeza que deseja finalizar esta locação?"
+                          );
+                          if (!confirm) return;
+                          try {
+                            await RentService.finalizeRent(rent.id);
+                            fetchRents();
+                          } catch (err) {
+                            alert("Erro ao finalizar a locação.");
+                          }
+                        }}
+                      >
+                        <FiCheck className="text-white" />
+                        Finalizar
+                      </button>
+                    )}
+
+                    {rent.status !== "rejeitado" && !alreadyRated ? (
+                      <button
+                        className="flex items-center gap-2 px-3 py-1 rounded text-white bg-purple-500 hover:bg-purple-600 transition"
+                        onClick={() => setSelectedRent(rent)}
+                      >
+                        <FiStar className="text-white" />
+                        Avaliar
+                      </button>
+                    ) : rent.status === "finalizado" && alreadyRated ? (
+                      <span className="flex items-center gap-2 px-3 py-1 rounded text-white bg-emerald-200">
+                        <FiStar className="text-white" />
+                        Avaliado
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </div>
+
       {selectedRent && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setSelectedRent(null)}
+          className="fixed inset-0 bg-transparent bg-opacity-40 flex items-center justify-center z-50"
+          onClick={() => {
+            setSelectedRent(null);
+            setRatingStep("owner");
+          }}
         >
           <div
-            className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg"
-            onClick={(e) => e.stopPropagation()} // impede fechar clicando dentro do modal
+            className="bg-gray-100 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Avaliar Locação</h2>
+            <h2 className="text-2xl font-bold text-center text-purple-700 mb-4">
+              Avaliação – Proprietário
+            </h2>
 
-            {/* avaliação do dono */}
-            <div className="mb-4">
-              <p className="text-gray-700 font-medium">Avaliar Dono:</p>
-              <div className="flex gap-2 mt-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRateOwner(selectedRent.owner?.id, star)}
-                    className={`px-3 py-1 rounded text-white ${
-                      ratedOwners[selectedRent.owner?.id] === star ? "bg-purple-700" : "bg-purple-500"
-                    }`}
-                  >
-                    {star}
-                  </button>
-                ))}
+            <p className="text-center text-gray-600 text-sm mb-4">
+              Como você avalia o proprietário?
+            </p>
+
+            <div className="flex flex-col items-center gap-2 mb-6">
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => {
+                  const selected = ratedOwners[selectedRent.owner?.id];
+                  const isFilled = hoveredStar
+                    ? star <= hoveredStar
+                    : star <= selected;
+
+                  return (
+                    <button
+                      key={star}
+                      onClick={() =>
+                        handleRateOwner(selectedRent.owner.id, star)
+                      }
+                      onMouseEnter={() => setHoveredStar(star)}
+                      onMouseLeave={() => setHoveredStar(null)}
+                      aria-label={`${star} estrela${star > 1 ? "s" : ""}`}
+                      className="text-yellow-400 text-2xl transition-transform transform hover:scale-110"
+                    >
+                      {isFilled ? <FaStar /> : <FaRegStar />}
+                    </button>
+                  );
+                })}
               </div>
+
+              <p className="text-sm text-purple-700 font-medium h-5">
+                {currentRating
+                  ? ratingLabels[currentRating as 1 | 2 | 3 | 4 | 5]
+                  : ""}
+              </p>
+
+              {/* Novo campo de descrição */}
+              <textarea
+                className="w-full mt-2 p-2 border text-black border-gray-300 rounded text-sm resize-none"
+                rows={3}
+                placeholder="Deixe um comentário (opcional)"
+                value={ratingDescription}
+                onChange={(e) => setRatingDescription(e.target.value)}
+              ></textarea>
             </div>
 
-            {/* avaliação do espaço */}
-            <div className="mb-4">
-              <p className="text-gray-700 font-medium">Avaliar Espaço:</p>
-              <div className="flex gap-2 mt-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRatePlace(selectedRent.place?.id, star)}
-                    className={`px-3 py-1 rounded text-white ${
-                      ratedPlaces[selectedRent.place?.id] === star ? "bg-purple-700" : "bg-purple-500"
-                    }`}
-                  >
-                    {star}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-end">
+            <div className="flex justify-between">
               <button
-                onClick={() => setSelectedRent(null)}
-                className="text-sm text-gray-500 hover:underline"
+                onClick={() => {
+                  setSelectedRent(null);
+                  setRatingStep("owner");
+                }}
+                className="text-sm text-gray-500 hover:text-gray-700 transition"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSubmitRatings}
-                className="px-4 py-2 mt-4 bg-green-500 text-white rounded hover:bg-green-600"
+                className="px-4 py-2 rounded text-white font-semibold transition bg-green-500 hover:bg-green-600"
               >
                 Concluir Avaliação
               </button>
@@ -282,4 +341,3 @@ export default function MyRents() {
     </div>
   );
 }
-
