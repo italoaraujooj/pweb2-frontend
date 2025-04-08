@@ -55,6 +55,12 @@ export default function RegisterUser() {
 
   return (
     <div className="min-h-screen min-w-screen flex flex-col items-center justify-center bg-gray-100">
+      <h1
+        onClick={() => navigate("/")}
+        className="absolute top-4 left-6 text-purple-600 text-2xl font-bold hover:cursor-pointer"
+      >
+        Alugaí
+      </h1>
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold text-gray-800 text-center">
           Criar Conta
@@ -128,7 +134,7 @@ export default function RegisterUser() {
             />
           </div>
 
-          <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
+          <button className="w-full bg-black text-white p-2 rounded hover:bg-purple-600 transition">
             Cadastrar
           </button>
         </form>
@@ -137,7 +143,7 @@ export default function RegisterUser() {
           <p className="text-gray-600">Já tem uma conta?</p>
           <button
             onClick={() => navigate("/")}
-            className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 transition mt-2"
+            className="w-full bg-black text-white p-2 rounded hover:bg-purple-600 transition mt-2"
           >
             Entrar
           </button>

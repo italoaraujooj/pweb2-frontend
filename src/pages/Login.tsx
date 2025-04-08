@@ -15,11 +15,9 @@ export default function Login() {
     try {
       const response = await AuthService.login({ email, password });
 
-      console.log("Login bem-sucedido:", response.data);
-
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("userEmail", email);
-      localStorage.setItem("userId", response.data.user.id); // 👈 se você quiser usar depois
+      localStorage.setItem("userId", response.data.user.id);
 
       navigate("/home");
     } catch (error: any) {
@@ -41,8 +39,18 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen min-w-screen flex flex-col items-center justify-center bg-gray-100">
+    <div className="min-h-screen min-w-screen flex flex-col items-center justify-center bg-gray-100 relative">
+      {/* Alugaí no canto superior esquerdo */}
+      <h1
+        onClick={() => navigate("/")}
+        className="absolute top-4 left-6 text-purple-600 text-2xl font-bold hover:cursor-pointer"
+      >
+        Alugaí
+      </h1>
+
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
+        <h2 className="text-2xl font-bold text-gray-800 text-center">Entrar</h2>
+
         {error && (
           <div className="flex items-center justify-center text-red-500 text-sm mb-4">
             ⚠️ <span className="ml-2">{error}</span>
@@ -78,6 +86,7 @@ export default function Login() {
             Entrar
           </button>
         </form>
+
         <div className="mt-4 text-center">
           <p className="text-gray-600">Ainda não tem uma conta?</p>
           <button

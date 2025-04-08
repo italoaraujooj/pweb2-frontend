@@ -69,6 +69,8 @@ export const RentService = {
   cancelRent: (id: string) => api.put(`/rents/${id}/cancel`),
 
   getUserRents: () => api.get("/rents/me"),
+
+  finalizeRent: (id: string) => api.put(`/rents/${id}/finalize`),
 };
 
 export const UserService = {
@@ -80,11 +82,11 @@ export const UserService = {
     const formData = new FormData();
     formData.append("profileImage", file);
     formData.append("userId", userId);
-  
+
     return api.patch(`/users/upload-profile-image`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-  }
+  },
 };
 
 export const PlaceService = {
@@ -112,6 +114,59 @@ export const PlaceService = {
   updatePlace: (id: string, data: any) => api.put(`/places/${id}`, data),
 
   deletePlace: (id: string) => api.delete(`/places/${id}`),
+};
+
+export const RatingService = {
+  // Avaliação de usuário
+  rateUser: async (payload: {
+    reviewerId: string;
+    reviewedId: string;
+    rentId: string;
+    rating: number;
+    description?: string;
+  }) => {
+    return await api.post("/ratings/user", payload);
+  },
+
+  getRatingsByUser: (reviewerId: string) =>
+    api.get(`/ratings/user/${reviewerId}`),
+
+  // Avaliação de espaço
+  ratePlace: async (payload: {
+    reviewerId: string;
+    reviewedId: string;
+    rentId: string;
+    rating: number;
+    description?: string;
+  }) => {
+    return await api.post("/ratings/place", payload);
+  },
+
+  // Recuperar todas as avaliações
+  getAllRatings: async () => {
+    return await api.get("/ratings");
+  },
+
+  // Buscar avaliação por ID
+  getRatingById: async (id: string) => {
+    return await api.get(`/ratings/${id}`);
+  },
+
+  // Deletar avaliação
+  deleteRating: async (id: string) => {
+    return await api.delete(`/ratings/${id}`);
+  },
+
+  // Atualizar média de um usuário
+  updateUserAverageRating: async (userId: string) => {
+    // Endpoint separado para isso seria ideal, mas se for interno, pode usar getUser/updateUser também
+    return await api.put(`/users/${userId}/average-rating`);
+  },
+
+  // Atualizar média de um espaço
+  updatePlaceAverageRating: async (placeId: string) => {
+    return await api.put(`/places/${placeId}/average-rating`);
+  },
 };
 
 export default api;

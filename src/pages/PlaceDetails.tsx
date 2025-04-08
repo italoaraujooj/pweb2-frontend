@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { PlaceService } from "../services/api";
+import { PlaceService, UserService } from "../services/api";
 import Header from "../components/Header";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -16,11 +16,23 @@ export default function PlaceDetails() {
   const [isOwner, setIsOwner] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [availableTurns, setAvailableTurns] = useState<string[]>([]);
+  const [owner, setOwner] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchPlace();
   }, [id]);
+
+  const fetchUser = async (id: any) => {
+    try {
+      const response = await UserService.getUserById(id!);
+      setOwner(response.data);
+    }
+    catch (err: any) {
+      console.log(err);
+      setError("Erro ao carregar dados do proprietário.")
+    }
+  };
 
   const fetchPlace = async () => {
     try {
@@ -31,6 +43,7 @@ export default function PlaceDetails() {
       if (response.data.ownerId === loggedInUserId) {
         setIsOwner(true);
       }
+      fetchUser(response.data.ownerId);
     } catch (err: any) {
       setError("Erro ao carregar os dados do espaço.");
     }
@@ -65,6 +78,10 @@ export default function PlaceDetails() {
         <h1 className="text-3xl text-center font-bold mb-4">{place.name}</h1>
 
         <p className="mb-2">
+          <strong>Avaliação:</strong> {place.averageRating}
+        </p>
+
+        <p className="mb-2">
           <strong>Endereço:</strong> {place.address?.rua},{" "}
           {place.address?.numero} - {place.address?.bairro},{" "}
           {place.address?.cidade} - {place.address?.estado}
@@ -77,6 +94,17 @@ export default function PlaceDetails() {
         <p className="mb-4">
           <strong>Preço por turno:</strong> R$ {place.pricePerTurn?.toFixed(2)}
         </p>
+
+        {owner && (
+        <p className="mb-2">
+          <strong>Dono:</strong>{" "}
+          <button
+            onClick={() => navigate(`/user/${owner.id}`)}
+            className="text-purple-700 hover:underline"
+          >
+            {owner.name}
+          </button>
+        </p>)}
 
         {/* Disponibilidade com calendário */}
         <div className="mb-6">
